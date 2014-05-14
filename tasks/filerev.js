@@ -8,15 +8,15 @@ var eachAsync = require('each-async');
 module.exports = function (grunt) {
   function makeHash(filepath, algorithm, fileEncoding, encoding) {
     var hash = crypto.createHash(algorithm);
-  	if (grunt.file.isDir(filepath)) {
-	  	grunt.file.recurse(filepath, function (abspath) {
-		  	grunt.log.verbose.write('Hashing ' + abspath + '...');
-			  hash.update(grunt.file.read(abspath), fileEncoding);
-	  	});
-	  } else {
-	  	grunt.log.verbose.write('Hashing ' + filepath + '...');
-	  	hash.update(grunt.file.read(filepath), fileEncoding);
-	  }
+    if (grunt.file.isDir(filepath)) {
+      grunt.file.recurse(filepath, function (abspath) {
+        grunt.log.verbose.write('Hashing ' + abspath + '...');
+        hash.update(grunt.file.read(abspath), fileEncoding);
+      });
+    } else {
+      grunt.log.verbose.write('Hashing ' + filepath + '...');
+      hash.update(grunt.file.read(filepath), fileEncoding);
+    }
     return hash.digest(encoding);
   }
   grunt.registerMultiTask('filerev', 'File revisioning based on content hashing', function () {
