@@ -6,6 +6,19 @@ var chalk = require('chalk');
 var eachAsync = require('each-async');
 
 module.exports = function (grunt) {
+  function makeHash(filepath, algorithm, fileEncoding, encoding) {
+    var hash = crypto.createHash(algorithm);
+  	if (grunt.file.isDir(filepath)) {
+	  	grunt.file.recurse(filepath, function (abspath) {
+		  	grunt.log.verbose.write('Hashing ' + abspath + '...');
+			  hash.update(grunt.file.read(abspath), fileEncoding);
+	  	});
+	  } else {
+	  	grunt.log.verbose.write('Hashing ' + filepath + '...');
+	  	hash.update(grunt.file.read(filepath), fileEncoding);
+	  }
+    return hash.digest(encoding);
+  }
   grunt.registerMultiTask('filerev', 'File revisioning based on content hashing', function () {
     var options = this.options({
       encoding: 'utf8',
@@ -40,11 +53,12 @@ module.exports = function (grunt) {
 
       el.src.forEach(function (file) {
         var dirname;
-        var hash = crypto.createHash(options.algorithm).update(grunt.file.read(file), options.encoding).digest('hex');
+        var hash = makeHash(file, options.algorithm, options.encoding, 'hex');
         var suffix = hash.slice(0, options.length);
         var ext = path.extname(file);
-        var newName = [path.basename(file, ext), suffix, ext.slice(1)].join('.');
-        var resultPath;
+        var elements = ext ? [path.basename(file, ext), suffix, ext.slice(1)] : [path.basename(file), suffix];
+		    var newName = elements.join('.');
+		    var resultPath;
 
         if (move) {
           dirname = path.dirname(file);
